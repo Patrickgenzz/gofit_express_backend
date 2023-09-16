@@ -1,0 +1,227 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model deposit_kelas_member {
+  id_deposit_kelas_member String @id @db.VarChar(10)
+  id_member               String @db.VarChar(10)
+  id_kelas                String @db.VarChar(10)
+  sisa_deposit_kelas      Int?
+  member                  member @relation(fields: [id_member], references: [id_member], onUpdate: Restrict, map: "FK_RELATION_269")
+  kelas                   kelas  @relation(fields: [id_kelas], references: [id_kelas], onUpdate: Restrict, map: "FK_RELATION_270")
+
+  @@index([id_member], map: "RELATION_269_FK")
+  @@index([id_kelas], map: "RELATION_270_FK")
+}
+
+model instruktur {
+  id_instruktur            String                @id @db.VarChar(10)
+  nama_instruktur          String?               @db.VarChar(255)
+  alamat_instruktur        String?               @db.VarChar(255)
+  tanggal_lahir_instruktur DateTime?             @db.Date
+  no_telepon_instruktur    String?               @db.VarChar(20)
+  password                 String?               @db.VarChar(255)
+  email                    String?               @db.VarChar(255)
+  izin_instruktur          izin_instruktur[]
+  jadwal_harian            jadwal_harian[]
+  jadwal_umum              jadwal_umum[]
+  presensi_instruktur      presensi_instruktur[]
+}
+
+model izin_instruktur {
+  id_izin_instruktur     String      @id @db.VarChar(10)
+  id_instruktur          String?     @db.VarChar(10)
+  tanggal_pembuatan      DateTime?   @db.DateTime(0)
+  tanggal_izin           DateTime?   @db.DateTime(0)
+  alasan_izin            String?     @db.VarChar(255)
+  status_konfirmasi_izin String?     @db.VarChar(20)
+  tanggal_konfirmasi     DateTime?   @db.DateTime(0)
+  instruktur_pengganti   String      @db.VarChar(255)
+  instruktur             instruktur? @relation(fields: [id_instruktur], references: [id_instruktur], onDelete: Restrict, onUpdate: Restrict, map: "FK_RELATION_162")
+
+  @@index([id_instruktur], map: "RELATION_162_FK")
+}
+
+model jadwal_harian {
+  tanggal_jadwal_harian DateTime              @id @db.DateTime(0)
+  id_jadwal_umum        String                @db.VarChar(10)
+  id_instruktur         String?               @db.VarChar(10)
+  status_kelas          String?               @db.VarChar(20)
+  jadwal_umum           jadwal_umum           @relation(fields: [id_jadwal_umum], references: [id_jadwal_umum], onUpdate: Restrict, map: "FK_RELATION_259")
+  instruktur            instruktur?           @relation(fields: [id_instruktur], references: [id_instruktur], onDelete: Restrict, onUpdate: Restrict, map: "FK_RELATION_262")
+  presensi_instruktur   presensi_instruktur[]
+
+  @@index([id_jadwal_umum], map: "RELATION_259_FK")
+  @@index([id_instruktur], map: "RELATION_262_FK")
+}
+
+model jadwal_umum {
+  id_jadwal_umum   String          @id @db.VarChar(10)
+  id_kelas         String?         @db.VarChar(10)
+  id_instruktur    String?         @db.VarChar(10)
+  hari_jadwal_umum String?         @db.VarChar(20)
+  sesi_jadwal_umum Int?
+  jadwal_harian    jadwal_harian[]
+  kelas            kelas?          @relation(fields: [id_kelas], references: [id_kelas], onDelete: Restrict, onUpdate: Restrict, map: "FK_RELATION_488")
+  instruktur       instruktur?     @relation(fields: [id_instruktur], references: [id_instruktur], onDelete: Restrict, onUpdate: Restrict, map: "FK_RELATION_491")
+
+  @@index([id_kelas], map: "RELATION_488_FK")
+  @@index([id_instruktur], map: "RELATION_491_FK")
+}
+
+model kelas {
+  id_kelas                String                    @id @db.VarChar(10)
+  jenis_kelas             String?                   @db.VarChar(255)
+  tarif_kelas             Int?
+  kuota                   Int
+  deposit_kelas_member    deposit_kelas_member[]
+  jadwal_umum             jadwal_umum[]
+  transaksi_deposit_kelas transaksi_deposit_kelas[]
+}
+
+model member {
+  id_member               String                    @id @db.VarChar(10)
+  nama_member             String?                   @db.VarChar(255)
+  alamat_member           String?                   @db.VarChar(255)
+  tanggal_lahir_member    DateTime?                 @db.Date
+  no_telepon_member       String?                   @db.VarChar(20)
+  email                   String?                   @db.VarChar(255)
+  password                String?                   @db.VarChar(255)
+  sisa_deposit_uang       String?                   @db.VarChar(255)
+  tanggal_kadaluarsa      DateTime?                 @db.DateTime(0)
+  status                  String?                   @db.VarChar(20)
+  deposit_kelas_member    deposit_kelas_member[]
+  presensi_booking_gym    presensi_booking_gym[]
+  presensi_booking_kelas  presensi_booking_kelas[]
+  transaksi_aktivasi      transaksi_aktivasi[]
+  transaksi_deposit_kelas transaksi_deposit_kelas[]
+  transaksi_deposit_uang  transaksi_deposit_uang[]
+}
+
+model pegawai {
+  id_pegawai              String                    @id @db.VarChar(10)
+  nama_pegawai            String?                   @db.VarChar(255)
+  alamat_pegawai          String?                   @db.VarChar(255)
+  tanggal_lahir_pegawai   DateTime?                 @db.Date
+  no_telepon_pegawai      String?                   @db.VarChar(20)
+  role                    String?                   @db.VarChar(20)
+  email                   String?                   @db.VarChar(255)
+  password                String?                   @db.VarChar(255)
+  transaksi_aktivasi      transaksi_aktivasi[]
+  transaksi_deposit_kelas transaksi_deposit_kelas[]
+  transaksi_deposit_uang  transaksi_deposit_uang[]
+}
+
+model presensi_booking_gym {
+  id_booking_gym        String    @id @db.VarChar(10)
+  id_member             String    @db.VarChar(10)
+  tanggal_booking_gym   DateTime? @db.DateTime(0)
+  tanggal_dibooking_gym DateTime? @db.DateTime(0)
+  waktu_presensi_gym    DateTime? @db.DateTime(0)
+  slot_waktu_gym        Int?
+  status                String    @db.VarChar(20)
+  member                member    @relation(fields: [id_member], references: [id_member], onUpdate: Restrict, map: "FK_RELATION_265")
+
+  @@index([id_member], map: "RELATION_265_FK")
+}
+
+model presensi_booking_kelas {
+  id_booking_kelas        String    @id @db.VarChar(10)
+  id_member               String    @db.VarChar(10)
+  tanggal_booking_kelas   DateTime? @db.DateTime(0)
+  tanggal_dibooking_kelas DateTime? @db.DateTime(0)
+  waktu_presensi_kelas    DateTime? @db.DateTime(0)
+  tarif_kelas             Int?
+  status                  String    @db.VarChar(20)
+  member                  member    @relation(fields: [id_member], references: [id_member], onUpdate: Restrict, map: "FK_RELATION_263")
+
+  @@index([id_member], map: "RELATION_263_FK")
+}
+
+model presensi_instruktur {
+  id_presensi_instruktur String         @id @db.Char(10)
+  id_instruktur          String         @db.VarChar(10)
+  tanggal_jadwal_harian  DateTime?      @db.DateTime(0)
+  waktu_mulai_kelas      DateTime?      @db.Time(0)
+  waktu_selesai_kelas    DateTime?      @db.Time(0)
+  durasi_kelas           Int?
+  keterlambatan          Int?
+  instruktur             instruktur     @relation(fields: [id_instruktur], references: [id_instruktur], onUpdate: Restrict, map: "FK_RELATION_161")
+  jadwal_harian          jadwal_harian? @relation(fields: [tanggal_jadwal_harian], references: [tanggal_jadwal_harian], onUpdate: Restrict, map: "FK_RELATION_261")
+
+  @@index([id_instruktur], map: "RELATION_161_FK")
+  @@index([tanggal_jadwal_harian], map: "RELATION_261_FK")
+}
+
+model promo {
+  id_promo                String                    @id @db.VarChar(10)
+  jenis_promo             String?                   @db.VarChar(255)
+  waktu_mulai_promo       DateTime?                 @db.DateTime(0)
+  waktu_selesai_promo     DateTime?                 @db.DateTime(0)
+  minimal_pembelian       Int?
+  bonus                   Int?
+  transaksi_deposit_kelas transaksi_deposit_kelas[]
+  transaksi_deposit_uang  transaksi_deposit_uang[]
+}
+
+model transaksi_aktivasi {
+  id_aktivasi           String    @id @db.VarChar(10)
+  id_member             String?   @db.VarChar(10)
+  id_pegawai            String?   @db.VarChar(10)
+  tanggal_aktivasi      DateTime? @db.DateTime(0)
+  jumlay_pembayaran     Int?
+  masa_berlaku_aktivasi DateTime? @db.DateTime(0)
+  member                member?   @relation(fields: [id_member], references: [id_member], onDelete: Restrict, onUpdate: Restrict, map: "FK_RELATION_154")
+  pegawai               pegawai?  @relation(fields: [id_pegawai], references: [id_pegawai], onDelete: Restrict, onUpdate: Restrict, map: "FK_RELATION_490")
+
+  @@index([id_member], map: "RELATION_154_FK")
+  @@index([id_pegawai], map: "RELATION_490_FK")
+}
+
+model transaksi_deposit_kelas {
+  id_deposit_kelas           String    @id @db.VarChar(10)
+  id_member                  String?   @db.VarChar(10)
+  id_promo                   String?   @db.VarChar(10)
+  id_kelas                   String    @db.VarChar(10)
+  id_pegawai                 String?   @db.VarChar(10)
+  tanggal_deposit_kelas      DateTime? @db.DateTime(0)
+  jumlah_deposit_kelas       Int?
+  bonus_deposit_kelas        Int?
+  masa_berlaku_deposit_kelas DateTime? @db.DateTime(0)
+  jumlah_pembayaran          Int?
+  total_deposit_kelas        Int?
+  member                     member?   @relation(fields: [id_member], references: [id_member], onDelete: Restrict, onUpdate: Restrict, map: "FK_RELATION_156")
+  promo                      promo?    @relation(fields: [id_promo], references: [id_promo], onDelete: Restrict, onUpdate: Restrict, map: "FK_RELATION_159")
+  kelas                      kelas     @relation(fields: [id_kelas], references: [id_kelas], onUpdate: Restrict, map: "FK_RELATION_160")
+  pegawai                    pegawai?  @relation(fields: [id_pegawai], references: [id_pegawai], onDelete: Restrict, onUpdate: Restrict, map: "FK_RELATION_493")
+
+  @@index([id_member], map: "RELATION_156_FK")
+  @@index([id_promo], map: "RELATION_159_FK")
+  @@index([id_kelas], map: "RELATION_160_FK")
+  @@index([id_pegawai], map: "RELATION_493_FK")
+}
+
+model transaksi_deposit_uang {
+  id_deposit_uang      String    @id @db.VarChar(10)
+  id_member            String?   @db.VarChar(10)
+  id_pegawai           String?   @db.VarChar(10)
+  id_promo             String?   @db.VarChar(10)
+  tanggal_deposit_uang DateTime? @db.DateTime(0)
+  jumlah_deposit_uang  Int?
+  bonus_deposit_uang   Int?
+  total_deposit_uang   Int?
+  member               member?   @relation(fields: [id_member], references: [id_member], onDelete: Restrict, onUpdate: Restrict, map: "FK_RELATION_155")
+  pegawai              pegawai?  @relation(fields: [id_pegawai], references: [id_pegawai], onDelete: Restrict, onUpdate: Restrict, map: "FK_RELATION_157")
+  promo                promo?    @relation(fields: [id_promo], references: [id_promo], onDelete: Restrict, onUpdate: Restrict, map: "FK_RELATION_158")
+
+  @@index([id_member], map: "RELATION_155_FK")
+  @@index([id_pegawai], map: "RELATION_157_FK")
+  @@index([id_promo], map: "RELATION_158_FK")
+}
+
+
